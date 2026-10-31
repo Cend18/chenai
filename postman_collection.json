@@ -1,0 +1,117 @@
+{
+  "info": {
+    "name": "Chenai — Sesi 2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "generate-text",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/generate-text",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"prompt\": \"Jelaskan konsep REST API\", \"style\": \"formal\", \"temperature\": 0.4}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "generate-from-image",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/generate-from-image",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": []
+            },
+            {
+              "key": "prompt",
+              "type": "text",
+              "value": "Jelaskan bahan belajar ini."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "generate-from-document",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/generate-from-document",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "document",
+              "type": "file",
+              "src": []
+            },
+            {
+              "key": "prompt",
+              "type": "text",
+              "value": "Jelaskan bahan belajar ini."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "generate-from-audio",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/generate-from-audio",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "audio",
+              "type": "file",
+              "src": []
+            },
+            {
+              "key": "prompt",
+              "type": "text",
+              "value": "Jelaskan bahan belajar ini."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "api-chat (Sesi 3 Chatbot)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/chat",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"conversation\": [\n    { \"role\": \"user\", \"text\": \"Apa itu GEMINI API?\" }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
