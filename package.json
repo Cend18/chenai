@@ -1,7 +1,7 @@
 {
   "name": "gemini-flash-api",
   "version": "1.0.0",
-  "description": "Asisten belajar multimodal — praktik Gemini API Sesi 2 Hacktiv8",
+  "description": "Chenai — Multimodal AI Assistant & Chatbot powered by Google Gemini and Express",
   "engines": { "node": ">=22" },
   "main": "index.js",
   "scripts": {

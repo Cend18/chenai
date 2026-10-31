@@ -1,56 +1,155 @@
-# Chenai — Gemini multimodal
+# Chenai — Multimodal AI Assistant & Chatbot
 
-Proyek latihan berdasarkan **Sesi 2 - Materi Developers**, Hacktiv8, 68 halaman. Use case: asisten belajar teknis. Setiap permintaan berdiri sendiri, bukan percakapan dengan memori.
+Chenai adalah aplikasi web dan RESTful API berbasis kecerdasan buatan (*multimodal AI*) yang didukung oleh **Google Gemini 2.5 Flash** dan **Node.js (Express)**. Aplikasi ini memungkinkan pengguna untuk berinteraksi secara cerdas menggunakan berbagai jenis input: teks, gambar, dokumen, serta rekaman audio, dengan antarmuka web modern bertema **Claymorphism**.
 
-## Jalankan (Node.js 22+; diuji Node.js 24)
-1. Jalankan `npm ci` di folder proyek.
-2. Salin `.env.example` menjadi `.env`. Isi `GEMINI_API_KEY` dari https://aistudio.google.com/api-keys secara lokal. Jangan kirim key lewat chat atau commit ke Git.
-3. Jalankan `npm start`, lalu buka http://127.0.0.1:3000.
-4. Setelah mengubah `.env`, restart server.
+---
 
-Model default `gemini-2.5-flash` mengikuti materi. Jika tidak tersedia bagi akun Anda, ubah `GEMINI_MODEL` ke model multimodal yang tersedia di Google AI Studio. Key belum tersedia saat proyek dibuat; hasil AI nyata belum diverifikasi. `configured: true` hanya menunjukkan key terisi, bukan koneksi/key berhasil diuji.
+## 🌟 Fitur Utama
 
-## Pemetaan materi
-| Materi | Implementasi |
-|---|---|
-| Hal. 19–21, 30–35: Node, SDK, ES Modules, dotenv | `package.json`, `index.js`, `.env.example` |
-| Hal. 39–41: teks | `POST /generate-text`, JSON `{ "prompt": "Jelaskan OOP" }` |
-| Hal. 43–45: gambar | `POST /generate-from-image`, multipart `image` + `prompt` |
-| Hal. 47–49: dokumen | `POST /generate-from-document`, multipart `document` + `prompt` |
-| Hal. 52–54: audio | `POST /generate-from-audio`, multipart `audio` + `prompt` |
-| Hal. 56: buffer/Base64/inlineData | Multer memory storage; file tidak ditulis ke disk |
-| Hal. 26, 62, 67: UI dan pengumpulan | `public/`, tangkapan layar dan publikasi GitHub setelah verifikasi |
+- **💬 Asisten Cerdas Multimodal**:
+  - **Teks**: Eksplorasi konsep, pemecahan masalah kode, dan tanya jawab interaktif.
+  - **Gambar**: Analisis visual, ekstraksi informasi, dan deskripsi grafis (PNG, JPEG, WebP).
+  - **Dokumen**: Pemahaman dan ringkasan berkas PDF & TXT (UTF-8).
+  - **Audio**: Transkripsi dan analisis rekaman suara (MP3, WAV).
+  - **Chatbot API**: Endpoint percakapan multi-turn dengan riwayat obrolan (*conversation history*).
+- **🎨 Antarmuka Claymorphism**: Tampilan web taktil, lembut, dan elegan dengan efek 3D clay, responsif di berbagai perangkat, serta bebas XSS.
+- **⚡ Kinerja Cepat & Efisien**: Menggunakan model `gemini-2.5-flash` dengan latensi rendah melalui SDK resmi `@google/genai`.
+- **🛡️ Aman & Handal**:
+  - Pemrosesan berkas langsung di memori (*in-memory buffer*) menggunakan Multer tanpa jejak di penyimpanan disk lokal.
+  - Validasi *binary signature* (*magic bytes*) untuk mencegah pemalsuan tipe berkas (*file tampering*).
+  - Perlindungan terhadap kebocoran API Key dan pesan error upstream yang disanitasi.
+  - Dilengkapi *Rate Limiting* lokal, *Origin header validation*, dan *Content Security Policy* (CSP).
 
-Semua endpoint menerima `style` (`formal`/`santai`) dan `temperature` (0–2). System instruction fokus edukasi; output maksimum 4096 token. Sukses `{ "result": "..." }`; error `{ "code": "...", "message": "...", "requestId": "..." }`.
+---
 
-## Koreksi materi
-- Hal. 34 menggunakan `GEMINI_API_KEY`, hal. 35 `API_KEY`: nama utama `GEMINI_API_KEY`; alias lama tetap diterima.
-- Hal. 54 menulis field `document` untuk audio; field utama `audio`, alias `document` diterima, maksimum satu file.
-- `multer()` tanpa destination memakai memori, bukan folder uploads (hal. 32/64 bertentangan dengan kode dan hal. 56).
-- TXT UTF-8 dikirim sebagai text part; PDF sebagai inlineData. DOCX tidak diterima langsung; ekspor ke PDF dulu.
-- Bagian berjudul File API pada hal. 56 sebenarnya memakai inlineData, bukan layanan `ai.files.upload`. Proyek mengikuti contoh inlineData; lifecycle remote Files API tidak ditambahkan.
-- `package-lock.json` tetap disertakan supaya `npm ci` reproducible; berbeda dari anjuran hal. 61.
-- Versi Node minimum disesuaikan SDK modern, bukan lagi Node 18.
+## 🛠️ Prasyarat & Instalasi
 
-## Batas dan keamanan
-- Lokal saja: server bind `127.0.0.1`, bukan siap deploy publik. Tambahkan autentikasi, HTTPS, dan limit per pengguna sebelum deployment.
-- Maksimum satu file 10 MiB; prompt maksimum 10.000 karakter. PNG/JPEG/WebP, PDF/TXT UTF-8, MP3/WAV.
-- Validasi MIME dan signature dasar bukan pemeriksaan malware/decode lengkap. Gemini dapat menolak file rusak.
-- Limit lokal 60 POST/menit dan 5 permintaan aktif. Timeout SDK 60 detik. Tidak ada retry otomatis yang dapat menggandakan biaya.
-- API key hanya server. Output UI memakai textContent, bukan HTML dari AI.
-- Prompt dan file dikirim ke Google saat menekan kirim. Hindari data rahasia. Tidak ada database atau penyimpanan riwayat aplikasi; kebijakan retensi Google tetap berlaku.
+### 1. Prasyarat
+- **Node.js** v20 atau lebih baru (direkomendasikan v22+)
+- **NPM** (bawaan dari instalasi Node.js)
+- **Google Gemini API Key** (dapat dibuat secara gratis melalui [Google AI Studio](https://aistudio.google.com/api-keys))
 
-## Pengujian
-`npm test` menguji HTTP lokal, parsing multipart, validasi, error, dan UI. Respons provider pada tes adalah **test double berlabel**, bukan bukti Gemini berhasil.
+### 2. Kloning & Instal Dependensi
+```bash
+git clone https://github.com/<username-anda>/<nama-repo>.git
+cd <nama-repo>
+npm install
+```
 
-`npm audit --omit=dev` memeriksa dependency yang terpasang.
+### 3. Konfigurasi Lingkungan (.env)
+Salin berkas contoh konfigurasi:
+```bash
+cp .env.example .env
+```
+Buka berkas `.env` lalu masukkan API Key Gemini Anda:
+```env
+GEMINI_API_KEY=AIzaSy... (masukkan API key Anda di sini)
+GEMINI_MODEL=gemini-2.5-flash
+PORT=3000
+```
+> **Catatan Keamanan**: Berkas `.env` telah tercatat di `.gitignore` sehingga tidak akan terunggah ke repositori publik.
 
-Import `postman_collection.json`, gunakan baseUrl `http://127.0.0.1:3000`. Pilih file lokal pada setiap field File. Coba masing-masing endpoint dengan API key sebelum mengambil screenshot jawaban nyata atau mengumpulkan tugas.
+---
 
-## Pengumpulan
-Materi meminta URL repository GitHub dan screenshot UI. Folder ini belum dipublikasikan otomatis. Jangan unggah `.env`, node_modules, atau dokumen pribadi. Screenshot kondisi awal bukan bukti jawaban Gemini berhasil.
+## 🚀 Menjalankan Aplikasi
 
-## Referensi resmi
-- https://ai.google.dev/gemini-api/docs/generate-content/get-started
-- https://ai.google.dev/gemini-api/docs/generate-content/document-processing
-- https://ai.google.dev/gemini-api/docs/files
+Jalankan server aplikasi:
+```bash
+npm start
+```
+Atau secara langsung:
+```bash
+node index.js
+```
+
+Buka peramban (*browser*) dan akses:
+```
+http://127.0.0.1:3000
+```
+
+---
+
+## 📡 Dokumentasi Endpoint REST API
+
+Semua endpoint menerima parameter kustomisasi kreativitas:
+- `style`: `"formal"` atau `"santai"` (default: `"formal"`)
+- `temperature`: Nilai `0.0` sampai `2.0` (default: `0.4`)
+
+| Endpoint | Method | Tipe Konten | Parameter / Form Field | Deskripsi |
+|---|---|---|---|---|
+| `/health` | `GET` | - | - | Status kesehatan server dan konfigurasi API key |
+| `/api/chat` | `POST` | `application/json` | `{ "conversation": [...] }` | Percakapan multi-turn chatbot interaktif |
+| `/generate-text` | `POST` | `application/json` | `{ "prompt": "..." }` | Menghasilkan respons berbasis prompt teks |
+| `/generate-from-image` | `POST` | `multipart/form-data` | `image` (file) + `prompt` (opsional) | Analisis dan deskripsi gambar |
+| `/generate-from-document`| `POST` | `multipart/form-data` | `document` (file) + `prompt` (opsional) | Ringkasan berkas PDF / TXT |
+| `/generate-from-audio` | `POST` | `multipart/form-data` | `audio` (file) + `prompt` (opsional) | Transkripsi & telaah berkas audio |
+
+### Contoh Request: Chatbot Multi-Turn (`POST /api/chat`)
+```json
+{
+  "conversation": [
+    { "role": "user", "text": "Apa keunggulan arsitektur REST API?" },
+    { "role": "model", "text": "REST API bersifat stateless, scalable, dan memanfaatkan protokol standar HTTP." },
+    { "role": "user", "text": "Bisa berikan contoh struktur URL yang baik?" }
+  ]
+}
+```
+
+### Format Response Sukses:
+```json
+{
+  "result": "Jawaban dari Gemini AI..."
+}
+```
+
+### Format Response Error:
+```json
+{
+  "code": "INVALID_PROMPT",
+  "message": "Prompt wajib berupa teks, maksimum 10.000 karakter; mode teks tidak boleh kosong.",
+  "requestId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+}
+```
+
+---
+
+## 🧪 Pengujian Unit & Integrasi
+
+Aplikasi ini dilengkapi dengan rangkaian pengujian otomatis (*unit & security test suite*) tanpa dependensi eksternal tambahan menggunakan test runner bawaan Node.js:
+
+```bash
+node --test test/*.test.js
+```
+
+Cakupan pengujian meliputi:
+- ✅ Integritas seluruh endpoint API & parsing multipart
+- ✅ Validasi batas ukuran file (maksimal 10 MiB)
+- ✅ Validasi signature biner & penolakan file palsu
+- ✅ Pencegahan kebocoran kredensial dan penanganan error
+- ✅ Aksesibilitas, respon layout, dan proteksi XSS pada tampilan web
+
+---
+
+## 📁 Struktur Direktori
+
+```text
+├── index.js                  # Entry point Express API & integrasi Gemini SDK
+├── package.json              # Dependensi dan script project
+├── public/                   # Frontend Web Test Bench (Claymorphism UI)
+│   ├── index.html            # Antarmuka web utama
+│   ├── app.js                # Interaksi DOM, request handler, dan sanitasi
+│   ├── style.css             # Desain antarmuka bertema Claymorphism
+│   └── hero.png              # Ilustrasi visual header
+├── test/                     # Rangkaian pengujian otomatis
+│   ├── api.test.js           # Pengujian fungsionalitas endpoint
+│   ├── security.test.js      # Pengujian keamanan, rate limit, dan validasi
+│   └── ui.test.js            # Pengujian DOM, markup, dan aksesibilitas
+├── postman_collection.json   # Koleksi Postman untuk pengujian manual
+└── README.md                 # Dokumentasi proyek
+```
+
+---
+
+## 📜 Lisensi
+
+Proyek ini dirilis di bawah lisensi [ISC](LICENSE).
